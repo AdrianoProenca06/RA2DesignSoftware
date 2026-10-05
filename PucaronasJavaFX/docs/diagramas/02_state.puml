@@ -1,0 +1,48 @@
+@startuml
+title State - ciclo de vida da SolicitacaoCarona
+skinparam dpi 160
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam ClassBackgroundColor #FEFEFE
+skinparam ClassBorderColor #444444
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF8DC
+skinparam nodesep 40
+skinparam ranksep 50
+class SolicitacaoCarona <<Context>> {
+  - status : String
+  + getEstado() : EstadoSolicitacao
+  + mudarPara(e : EstadoSolicitacao) : void
+  + aceitar() : void
+  + recusar() : void
+  + cancelar() : void
+}
+interface EstadoSolicitacao <<State>> {
+  + nome() : String
+  + aceitar(ctx : SolicitacaoCarona) : void
+  + recusar(ctx : SolicitacaoCarona) : void
+  + cancelar(ctx : SolicitacaoCarona) : void
+}
+class EstadoPendente <<ConcreteState>>
+class EstadoAceita <<ConcreteState>>
+class EstadoRecusada <<ConcreteState>>
+class EstadoCancelada <<ConcreteState>>
+class EstadosSolicitacao {
+  + {static} PENDENTE
+  + {static} ACEITA
+  + {static} RECUSADA
+  + {static} CANCELADA
+  + {static} porNome(nome) : EstadoSolicitacao
+}
+class TransicaoInvalidaException
+SolicitacaoCarona --> EstadoSolicitacao : delega
+EstadoSolicitacao <|.. EstadoPendente
+EstadoSolicitacao <|.. EstadoAceita
+EstadoSolicitacao <|.. EstadoRecusada
+EstadoSolicitacao <|.. EstadoCancelada
+EstadoSolicitacao ..> SolicitacaoCarona : mudarPara(...)
+EstadosSolicitacao ..> EstadoSolicitacao
+EstadoAceita ..> TransicaoInvalidaException
+EstadoRecusada ..> TransicaoInvalidaException
+EstadoCancelada ..> TransicaoInvalidaException
+@enduml

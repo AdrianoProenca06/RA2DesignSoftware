@@ -1,0 +1,41 @@
+@startuml
+title Facade - CaronasFacade
+skinparam dpi 160
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam ClassBackgroundColor #FEFEFE
+skinparam ClassBorderColor #444444
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF8DC
+skinparam nodesep 40
+skinparam ranksep 50
+class CaronasFacade <<Facade>> {
+  + solicitarCarona(passageiroId, caronaId) : SolicitacaoCarona
+  + aceitarSolicitacao(solicitacaoId) : Pagamento
+  + recusarSolicitacao(solicitacaoId) : SolicitacaoCarona
+  + cancelarSolicitacao(solicitacaoId) : SolicitacaoCarona
+  + pagar(pagamentoId, metodo) : Pagamento
+  + simularPreco(caronaId) : double
+  + caronasDisponiveis() : List<Carona>
+}
+class FluxoCaronaView <<Client>>
+class SolicitacaoCaronaController <<Client>>
+class PagamentoController <<Client>>
+package "Subsistemas" {
+  class CaronaService
+  class SolicitacaoCaronaService
+  class PagamentoService
+  class MotoristaService
+  class CalculadoraPreco
+  class BarramentoEventos
+}
+FluxoCaronaView --> CaronasFacade
+SolicitacaoCaronaController --> CaronasFacade
+PagamentoController --> CaronasFacade
+CaronasFacade --> CaronaService
+CaronasFacade --> SolicitacaoCaronaService
+CaronasFacade --> PagamentoService
+CaronasFacade --> MotoristaService
+CaronasFacade --> CalculadoraPreco
+CaronasFacade --> BarramentoEventos
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+title Sequência - aceitarSolicitacao(): os padrões colaborando
+skinparam dpi 160
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+actor Motorista
+participant "FluxoCaronaView" as V
+participant "CaronasFacade" as F <<Facade>>
+participant "CalculadoraPreco" as C <<Strategy Context>>
+participant "RateioDeCusto" as S <<Strategy>>
+participant "SolicitacaoCaronaService" as SS
+participant "SolicitacaoCarona" as SC <<State Context>>
+participant "EstadoPendente" as EP <<State>>
+participant "CaronaService" as CS
+participant "PagamentoService" as PS
+participant "BarramentoEventos" as B <<Singleton / Subject>>
+participant "NotificacaoObserver" as NO <<Observer>>
+Motorista -> V : clica "Aceitar"
+V -> F : aceitarSolicitacao(id)
+F -> F : valida vagas > 0
+F -> C : calcularPara(carona, confirmados)
+C -> S : calcular(carona, confirmados)
+S --> C : valor
+C --> F : valor
+F -> SS : aceitar(id)
+SS -> SC : aceitar()
+SC -> EP : aceitar(this)
+EP -> SC : mudarPara(ACEITA)
+F -> CS : reduzirVagas(caronaId)
+F -> PS : criar(id, valor, "pix")
+F -> B : publicar(SOLICITACAO_ACEITA)
+B -> NO : atualizar(evento)
+NO -> NO : cria Notificacao para o passageiro
+F --> V : Pagamento (pendente)
+@enduml

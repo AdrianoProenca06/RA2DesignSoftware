@@ -1,0 +1,49 @@
+@startuml
+title Strategy - política de preço
+skinparam dpi 160
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam ClassBackgroundColor #FEFEFE
+skinparam ClassBorderColor #444444
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF8DC
+skinparam nodesep 40
+skinparam ranksep 50
+class CalculadoraPreco <<Context>> {
+  - estrategia : EstrategiaPreco
+  + setEstrategia(e : EstrategiaPreco) : void
+  + calcular(carona, n) : double
+  + calcularPara(carona, n) : double
+}
+interface EstrategiaPreco <<Strategy>> {
+  + nome() : String
+  + descricao() : String
+  + calcular(carona : Carona, passageirosConfirmados : int) : double
+}
+class PrecoFixo <<ConcreteStrategy>> {
+  valorBase
+}
+class PrecoPorKm <<ConcreteStrategy>> {
+  distanciaKm x valorBase
+}
+class RateioDeCusto <<ConcreteStrategy>> {
+  (distanciaKm x valorBase) / ocupantes
+}
+class EstrategiasPreco {
+  + {static} por(nome : String) : EstrategiaPreco
+  + {static} registrar(e : EstrategiaPreco) : void
+  + {static} nomes() : List<String>
+}
+class Carona {
+  - distanciaKm : double
+  - valorBase : double
+  - politicaPreco : String
+}
+CalculadoraPreco o--> EstrategiaPreco
+EstrategiaPreco <|.. PrecoFixo
+EstrategiaPreco <|.. PrecoPorKm
+EstrategiaPreco <|.. RateioDeCusto
+EstrategiasPreco ..> EstrategiaPreco
+CalculadoraPreco ..> EstrategiasPreco : escolhe por\ncarona.politicaPreco
+EstrategiaPreco ..> Carona
+@enduml

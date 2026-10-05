@@ -1,0 +1,49 @@
+@startuml
+title Template Method - persistência (BaseRepository)
+skinparam dpi 160
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam ClassBackgroundColor #FEFEFE
+skinparam ClassBorderColor #444444
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF8DC
+skinparam nodesep 40
+skinparam ranksep 50
+abstract class "BaseRepository<T>" as BaseRepository {
+  + inserir(t : T) : void {final}
+  + atualizar(t : T) : void {final}
+  + excluir(t : T) : void {final}
+  + excluirPorId(id : String) : void {final}
+  + buscarPorId(id : String) : Optional<T> {final}
+  + listar() : List<T>
+  # salvarLista(l : List<T>) : void
+  --hooks--
+  # {abstract} idDe(t : T) : String
+  # validar(t : T) : void
+}
+class CaronaRepository {
+  # idDe(c : Carona) : String
+  # validar(c : Carona) : void
+  + buscarPorMotorista(id) : List<Carona>
+  + buscarPorRota(o, d) : List<Carona>
+}
+class SolicitacaoCaronaRepository {
+  # idDe(s : SolicitacaoCarona) : String
+  + buscarPorCarona(id) : List<SolicitacaoCarona>
+}
+class PagamentoRepository {
+  # idDe(p : Pagamento) : String
+  + buscarPorSolicitacao(id) : List<Pagamento>
+}
+class "... (7 outros repositórios)" as Outros
+BaseRepository <|-- CaronaRepository
+BaseRepository <|-- SolicitacaoCaronaRepository
+BaseRepository <|-- PagamentoRepository
+BaseRepository <|-- Outros
+note right of BaseRepository
+  inserir():  validar -> listar -> add -> salvarLista
+  atualizar(): validar -> listar -> substituir por id -> salvarLista
+  Os métodos-template são final: subclasses
+  só preenchem os ganchos.
+end note
+@enduml
