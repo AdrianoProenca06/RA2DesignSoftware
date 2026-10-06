@@ -1,0 +1,54 @@
+@startuml
+title Observer + Singleton - eventos do domínio
+skinparam dpi 160
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam ClassBackgroundColor #FEFEFE
+skinparam ClassBorderColor #444444
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF8DC
+skinparam nodesep 40
+skinparam ranksep 50
+class BarramentoEventos <<Subject, Singleton>> {
+  - {static} INSTANCIA : BarramentoEventos
+  - observadores : List<ObservadorEventos>
+  - BarramentoEventos()
+  + {static} getInstancia() : BarramentoEventos
+  + registrar(o : ObservadorEventos) : void
+  + remover(o : ObservadorEventos) : void
+  + publicar(e : EventoCarona) : void
+}
+interface ObservadorEventos <<Observer>> {
+  + atualizar(e : EventoCarona) : void
+}
+class NotificacaoObserver <<ConcreteObserver>>
+class HistoricoObserver <<ConcreteObserver>>
+class AuditoriaObserver <<ConcreteObserver>>
+class EventoCarona <<record>> {
+  + tipo : TipoEvento
+  + solicitacao : SolicitacaoCarona
+  + carona : Carona
+  + pagamento : Pagamento
+  + quando : LocalDateTime
+}
+enum TipoEvento {
+  SOLICITACAO_CRIADA
+  SOLICITACAO_ACEITA
+  SOLICITACAO_RECUSADA
+  SOLICITACAO_CANCELADA
+  PAGAMENTO_REALIZADO
+}
+class CaronasFacade <<publica eventos>>
+class NotificacaoService
+class HistoricoCorrridaService
+BarramentoEventos o--> "*" ObservadorEventos
+ObservadorEventos <|.. NotificacaoObserver
+ObservadorEventos <|.. HistoricoObserver
+ObservadorEventos <|.. AuditoriaObserver
+ObservadorEventos ..> EventoCarona
+EventoCarona --> TipoEvento
+CaronasFacade --> BarramentoEventos : publicar()
+NotificacaoObserver --> NotificacaoService
+HistoricoObserver --> HistoricoCorrridaService
+BarramentoEventos ..> BarramentoEventos : única instância
+@enduml

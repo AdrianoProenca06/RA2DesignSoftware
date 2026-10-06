@@ -1,0 +1,19 @@
+@startuml
+title Máquina de estados da SolicitacaoCarona
+skinparam dpi 160
+skinparam shadowing false
+[*] --> pendente : solicitarCarona()
+pendente --> aceita : aceitar()
+pendente --> recusada : recusar()
+pendente --> cancelada : cancelar()
+aceita --> cancelada : cancelar()\n(devolve vaga e cancela pagamento)
+recusada --> [*]
+cancelada --> [*]
+note right of aceita
+  aceitar()/recusar() aqui
+  lançam TransicaoInvalidaException
+end note
+note bottom of recusada
+  estados finais: nenhuma operação é permitida
+end note
+@enduml

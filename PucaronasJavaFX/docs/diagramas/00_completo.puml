@@ -1,0 +1,252 @@
+@startuml
+title Pucaronas - Diagrama de Classes Completo (após refatoração com padrões GoF)
+skinparam dpi 170
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam ClassBackgroundColor #FEFEFE
+skinparam ClassBorderColor #444444
+skinparam ArrowColor #444444
+skinparam NoteBackgroundColor #FFF8DC
+skinparam nodesep 25
+skinparam ranksep 45
+
+package "view  (JavaFX)" #F2F2F2 {
+  abstract class BaseCrudView <<Template Method>> {
+    # stage : Stage
+    # scene : Scene
+    # {abstract} inicializarController() : void
+    # {abstract} criarTela() : void
+    # criarBotaoVoltar() : HBox
+  }
+  class FluxoCaronaView
+  class SolicitacaoCaronaCrudView
+  class PagamentoCrudView
+  class CaronaCrudView
+}
+
+package "controller" #F2F2F2 {
+  class SolicitacaoCaronaController
+  class PagamentoController
+  class CaronaController
+}
+
+package "facade" #E3F2FD {
+  class CaronasFacade <<Facade>> {
+    + solicitarCarona(passageiroId, caronaId) : SolicitacaoCarona
+    + aceitarSolicitacao(solicitacaoId) : Pagamento
+    + recusarSolicitacao(solicitacaoId) : SolicitacaoCarona
+    + cancelarSolicitacao(solicitacaoId) : SolicitacaoCarona
+    + pagar(pagamentoId, metodo) : Pagamento
+    + simularPreco(caronaId) : double
+  }
+}
+
+package "service" #F2F2F2 {
+  class CaronaService
+  class SolicitacaoCaronaService
+  class PagamentoService
+  class MotoristaService
+  class NotificacaoService
+  class HistoricoCorrridaService
+}
+
+package "strategy" #E8F5E9 {
+  interface EstrategiaPreco <<Strategy>> {
+    + nome() : String
+    + descricao() : String
+    + calcular(carona, passageirosConfirmados) : double
+  }
+  class PrecoFixo
+  class PrecoPorKm
+  class RateioDeCusto
+  class EstrategiasPreco {
+    + {static} por(nome) : EstrategiaPreco
+    + {static} registrar(e) : void
+  }
+  class CalculadoraPreco <<Context>> {
+    - estrategia : EstrategiaPreco
+    + setEstrategia(e) : void
+    + calcular(carona, n) : double
+    + calcularPara(carona, n) : double
+  }
+}
+
+package "event" #FFF3E0 {
+  interface ObservadorEventos <<Observer>> {
+    + atualizar(evento : EventoCarona) : void
+  }
+  class BarramentoEventos <<Subject, Singleton>> {
+    - {static} INSTANCIA : BarramentoEventos
+    - observadores : List<ObservadorEventos>
+    - BarramentoEventos()
+    + {static} getInstancia() : BarramentoEventos
+    + registrar(o) : void
+    + remover(o) : void
+    + publicar(e : EventoCarona) : void
+  }
+  class EventoCarona <<record>> {
+    + tipo : TipoEvento
+    + solicitacao, carona, pagamento
+  }
+  enum TipoEvento {
+    SOLICITACAO_CRIADA
+    SOLICITACAO_ACEITA
+    SOLICITACAO_RECUSADA
+    SOLICITACAO_CANCELADA
+    PAGAMENTO_REALIZADO
+  }
+  class NotificacaoObserver
+  class HistoricoObserver
+  class AuditoriaObserver
+}
+
+package "state" #F3E5F5 {
+  interface EstadoSolicitacao <<State>> {
+    + nome() : String
+    + aceitar(ctx : SolicitacaoCarona) : void
+    + recusar(ctx : SolicitacaoCarona) : void
+    + cancelar(ctx : SolicitacaoCarona) : void
+  }
+  class EstadoPendente
+  class EstadoAceita
+  class EstadoRecusada
+  class EstadoCancelada
+  class EstadosSolicitacao {
+    + {static} PENDENTE, ACEITA, RECUSADA, CANCELADA
+    + {static} porNome(nome) : EstadoSolicitacao
+  }
+  class TransicaoInvalidaException
+}
+
+package "model" #FFFDE7 {
+  class SolicitacaoCarona <<Context>> {
+    - id, passageiroId, caronaId : String
+    - status : String
+    - dataSolicitacao : LocalDateTime
+    + getEstado() : EstadoSolicitacao
+    + mudarPara(e : EstadoSolicitacao) : void
+    + aceitar() : void
+    + recusar() : void
+    + cancelar() : void
+  }
+  class Carona {
+    - id, motoristaId, origem, destino : String
+    - horario : LocalDateTime
+    - vagasDisponiveis : int
+    - distanciaKm : double
+    - valorBase : double
+    - politicaPreco : String
+  }
+  class Pagamento {
+    - valor : double
+    - status, metodo : String
+  }
+  class Notificacao
+  class HistoricoCorrida
+  class Motorista
+  class Usuario
+}
+
+package "repository" #E0F7FA {
+  abstract class "BaseRepository<T>" as BaseRepository <<Template Method>> {
+    + inserir(t : T) : void {final}
+    + atualizar(t : T) : void {final}
+    + excluir(t : T) : void {final}
+    + excluirPorId(id : String) : void {final}
+    + buscarPorId(id : String) : Optional<T> {final}
+    + listar() : List<T>
+    # {abstract} idDe(t : T) : String
+    # validar(t : T) : void
+  }
+  class CaronaRepository
+  class SolicitacaoCaronaRepository
+  class PagamentoRepository
+  class NotificacaoRepository
+  class HistoricoCorrridaRepository
+  class MotoristaRepository
+  class "... UsuarioRepository, PerfilRepository,\nVeiculoRepository, AvaliacaoRepository" as OutrosRepos
+}
+
+' ---------- view / controller ----------
+BaseCrudView <|-- FluxoCaronaView
+BaseCrudView <|-- SolicitacaoCaronaCrudView
+BaseCrudView <|-- PagamentoCrudView
+BaseCrudView <|-- CaronaCrudView
+SolicitacaoCaronaCrudView --> SolicitacaoCaronaController
+PagamentoCrudView --> PagamentoController
+CaronaCrudView --> CaronaController
+FluxoCaronaView --> CaronasFacade
+SolicitacaoCaronaController --> CaronasFacade
+PagamentoController --> CaronasFacade
+CaronaController --> CaronaService
+
+' ---------- facade ----------
+CaronasFacade --> CaronaService
+CaronasFacade --> SolicitacaoCaronaService
+CaronasFacade --> PagamentoService
+CaronasFacade --> MotoristaService
+CaronasFacade --> CalculadoraPreco
+CaronasFacade --> BarramentoEventos
+CaronasFacade ..> EventoCarona : cria e publica
+
+' ---------- strategy ----------
+EstrategiaPreco <|.. PrecoFixo
+EstrategiaPreco <|.. PrecoPorKm
+EstrategiaPreco <|.. RateioDeCusto
+CalculadoraPreco o--> EstrategiaPreco
+EstrategiasPreco ..> EstrategiaPreco : catálogo
+CalculadoraPreco ..> EstrategiasPreco
+CalculadoraPreco ..> Carona
+
+' ---------- observer / singleton ----------
+BarramentoEventos o--> "*" ObservadorEventos
+ObservadorEventos <|.. NotificacaoObserver
+ObservadorEventos <|.. HistoricoObserver
+ObservadorEventos <|.. AuditoriaObserver
+ObservadorEventos ..> EventoCarona
+EventoCarona --> TipoEvento
+NotificacaoObserver --> NotificacaoService
+NotificacaoObserver --> MotoristaService
+HistoricoObserver --> HistoricoCorrridaService
+
+' ---------- state ----------
+SolicitacaoCarona --> EstadoSolicitacao : estado atual
+EstadoSolicitacao <|.. EstadoPendente
+EstadoSolicitacao <|.. EstadoAceita
+EstadoSolicitacao <|.. EstadoRecusada
+EstadoSolicitacao <|.. EstadoCancelada
+EstadoSolicitacao ..> SolicitacaoCarona : mudarPara()
+EstadosSolicitacao ..> EstadoSolicitacao
+EstadoAceita ..> TransicaoInvalidaException
+EstadoRecusada ..> TransicaoInvalidaException
+EstadoCancelada ..> TransicaoInvalidaException
+
+' ---------- services -> repositories ----------
+CaronaService --> CaronaRepository
+SolicitacaoCaronaService --> SolicitacaoCaronaRepository
+PagamentoService --> PagamentoRepository
+MotoristaService --> MotoristaRepository
+NotificacaoService --> NotificacaoRepository
+HistoricoCorrridaService --> HistoricoCorrridaRepository
+
+' ---------- template method ----------
+BaseRepository <|-- CaronaRepository
+BaseRepository <|-- SolicitacaoCaronaRepository
+BaseRepository <|-- PagamentoRepository
+BaseRepository <|-- NotificacaoRepository
+BaseRepository <|-- HistoricoCorrridaRepository
+BaseRepository <|-- MotoristaRepository
+BaseRepository <|-- OutrosRepos
+
+
+' ---------- referências entre entidades (por id) ----------
+Carona ..> Motorista : motoristaId
+Motorista ..> Usuario : usuarioId
+SolicitacaoCarona ..> Carona : caronaId
+SolicitacaoCarona ..> Usuario : passageiroId
+Pagamento ..> SolicitacaoCarona : solicitacaoCaronaId
+Notificacao ..> Usuario : usuarioId
+HistoricoCorrida ..> Motorista : motoristaId
+@enduml
