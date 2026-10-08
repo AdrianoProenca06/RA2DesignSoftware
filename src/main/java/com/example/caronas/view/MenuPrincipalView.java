@@ -49,16 +49,16 @@ public class MenuPrincipalView {
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(20));
 
-        Button btnUsuarios = new Button(" Gerenciar Usuários");
-        Button btnPerfis = new Button(" Gerenciar Perfis");
-        Button btnVeiculos = new Button(" Gerenciar Veículos");
-        Button btnMotoristas = new Button("️ Gerenciar Motoristas");
-        Button btnCaronas = new Button(" Gerenciar Caronas");
-        Button btnSolicitacoes = new Button(" Gerenciar Solicitações de Carona");
-        Button btnPagamentos = new Button(" Gerenciar Pagamentos");
-        Button btnHistorico = new Button(" Histórico de Corridas");
-        Button btnAvaliacoes = new Button(" Gerenciar Avaliações");
-        Button btnNotificacoes = new Button(" Gerenciar Notificações");
+        Button btnUsuarios = new Button("Gerenciar Usuários");
+        Button btnPerfis = new Button("Gerenciar Perfis");
+        Button btnVeiculos = new Button("Gerenciar Veículos");
+        Button btnMotoristas = new Button("Gerenciar Motoristas");
+        Button btnCaronas = new Button("Gerenciar Caronas");
+        Button btnSolicitacoes = new Button("Gerenciar Solicitações de Carona");
+        Button btnPagamentos = new Button("Gerenciar Pagamentos");
+        Button btnHistorico = new Button("Histórico de Corridas");
+        Button btnAvaliacoes = new Button("Gerenciar Avaliações");
+        Button btnNotificacoes = new Button("Gerenciar Notificações");
 
         // Definir estilo dos botões
         String btnStyle = "-fx-font-size: 14; -fx-padding: 10; -fx-min-height: 40;";
